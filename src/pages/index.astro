@@ -1,10 +1,18 @@
 ---
 import '../styles/global.css';
-// Component Imports
-import Button from '../components/Button.astro';
+import PostsPage from '../components/PostsPage';
+import { fetchPosts, type WordPressPost } from '../lib/wordpress';
 
-// Full Astro Component Syntax:
-// https://docs.astro.build/basics/astro-components/
+// Fetch posts at build time for SSG
+let posts: WordPressPost[] = [];
+try {
+  const result = await fetchPosts(50); // Fetch up to 50 posts
+  posts = result.nodes;
+} catch (error) {
+  console.error('Error fetching posts for SSG:', error);
+  // Fallback to empty array if WordPress is not available during build
+  posts = [];
+}
 ---
 
 <html lang="en">
@@ -13,13 +21,11 @@ import Button from '../components/Button.astro';
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro + TailwindCSS</title>
+		<title>Blog Posts - Astro + React + shadcn/ui</title>
+		<meta name="description" content="Discover insights, tutorials, and guides from our WordPress-powered blog." />
 	</head>
 
 	<body>
-		<div class="grid place-items-center h-screen content-center">
-			<Button>Tailwind Button in Astro!</Button>
-			<a href="/markdown-page" class="p-4 underline">Markdown is also supported...</a>
-		</div>
+		<PostsPage posts={posts} client:load />
 	</body>
 </html>

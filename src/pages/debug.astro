@@ -1,0 +1,23 @@
+---
+import '../styles/global.css';
+import WordPressDebug from '../components/WordPressDebug';
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>WordPress Debug - Astro + React + shadcn/ui</title>
+	</head>
+
+	<body>
+		<div class="min-h-screen bg-gray-50 p-8">
+			<div class="max-w-4xl mx-auto">
+				<h1 class="text-3xl font-bold mb-8">WordPress GraphQL Debug</h1>
+				<WordPressDebug client:load />
+			</div>
+		</div>
+	</body>
+</html>

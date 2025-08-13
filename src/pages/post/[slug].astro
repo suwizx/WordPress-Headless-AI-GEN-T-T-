@@ -1,0 +1,75 @@
+---
+import '../../styles/global.css';
+import SinglePost from '../../components/SinglePost';
+import { fetchAllPostSlugs, fetchSinglePost } from '../../lib/wordpress';
+
+// Get the slug from the URL
+const { slug } = Astro.params;
+
+// Generate static paths for all posts
+export async function getStaticPaths() {
+  try {
+    const slugs = await fetchAllPostSlugs();
+    return slugs.map((slug) => ({
+      params: { slug },
+      props: { slug },
+    }));
+  } catch (error) {
+    console.error('Error generating static paths:', error);
+    return [];
+  }
+}
+
+// Fetch post data at build time
+let post = null;
+let error = null;
+
+try {
+  if (slug) {
+    post = await fetchSinglePost(slug);
+  }
+} catch (err) {
+  console.error(`Error fetching post ${slug}:`, err);
+  error = err instanceof Error ? err.message : 'Unknown error';
+}
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{post ? post.title : 'Post Not Found'} - Astro WordPress Headless</title>
+		<meta name="description" content={post ? (post.excerpt ? post.excerpt.replace(/<[^>]*>/g, '') : post.title) : 'Post not found'} />
+		{post && post.featuredImage?.node && (
+			<meta property="og:image" content={post.featuredImage.node.sourceUrl} />
+		)}
+	</head>
+
+	<body>
+		{error ? (
+			<div class="min-h-screen bg-gray-50 flex items-center justify-center">
+				<div class="text-center">
+					<h1 class="text-2xl font-bold text-gray-900 mb-4">Post Not Found</h1>
+					<p class="text-gray-600 mb-4">{error}</p>
+					<a href="/" class="text-blue-600 hover:text-blue-800 underline">
+						Back to Posts
+					</a>
+				</div>
+			</div>
+		) : post ? (
+			<SinglePost post={post} client:load />
+		) : (
+			<div class="min-h-screen bg-gray-50 flex items-center justify-center">
+				<div class="text-center">
+					<h1 class="text-2xl font-bold text-gray-900 mb-4">Post Not Found</h1>
+					<p class="text-gray-600 mb-4">The requested post could not be found.</p>
+					<a href="/" class="text-blue-600 hover:text-blue-800 underline">
+						Back to Posts
+					</a>
+				</div>
+			</div>
+		)}
+	</body>
+</html>
